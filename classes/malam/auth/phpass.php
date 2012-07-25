@@ -138,4 +138,19 @@ class Malam_Auth_Phpass extends Kohana_Auth_ORM
     {
         return ($this->hasher->CheckPassword($this->_compile_password($password), $stored_hash));
     }
+
+    /**
+     * try login with array data
+     *
+     * @param array $values
+     * @return boolean
+     */
+    public function try_login(array $values)
+    {
+        $username = Arr::get($values, 'username');
+        $password = Arr::get($values, 'password');
+        $remember = Arr::get($values, 'remember');
+
+        return $this->login($username, $password, $remember);
+    }
 }
