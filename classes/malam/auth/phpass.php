@@ -13,7 +13,7 @@ class Malam_Auth_Phpass extends Kohana_Auth_ORM
      *
      * @var PasswordHash
      */
-    private $hasher;
+    protected $hasher;
 
     public function __construct($config = array())
     {
@@ -33,14 +33,7 @@ class Malam_Auth_Phpass extends Kohana_Auth_ORM
      */
     protected function _login($user, $password, $remember)
     {
-        if ( ! is_object($user))
-        {
-            $username = $user;
-
-            // Load the user
-            $user = ORM::factory('user');
-            $user->where($user->unique_key($username), '=', $username)->find();
-        }
+        $user = $this->_get_object($user);
 
         if ($user->loaded())
         {
@@ -113,7 +106,7 @@ class Malam_Auth_Phpass extends Kohana_Auth_ORM
         return $this->hasher->HashPassword($this->_compile_password($password));
     }
 
-    private function _compile_password($password)
+    protected function _compile_password($password)
     {
         return $password . '::' . $this->hash($password);
     }
@@ -134,9 +127,22 @@ class Malam_Auth_Phpass extends Kohana_Auth_ORM
         return ( $this->_check_password($password, $user->password) );
     }
 
-    private function _check_password($password, $stored_hash)
+    protected function _check_password($password, $stored_hash)
     {
         return ($this->hasher->CheckPassword($this->_compile_password($password), $stored_hash));
+    }
+
+    protected function _get_object($user)
+    {
+        static $current;
+        if ( ! is_object($current) AND is_string($user))
+        {
+            // Load the user
+            $current = ORM::factory('user');
+            $current->where($current->unique_key($user), '=', $user)->find();
+        }
+
+        return $current;
     }
 
     /**
